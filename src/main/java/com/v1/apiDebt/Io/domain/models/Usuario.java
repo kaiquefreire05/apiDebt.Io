@@ -36,13 +36,14 @@ public class Usuario {
     private LocalDateTime dataCadastro;
     private LocalDateTime dataAtualizacao;
     private List<Contas> contas;
+    private Boolean ativo = false;
 
     // Construtores
     public Usuario() {}
 
     public Usuario(UUID id, String nome, String sobrenome, String email, String senha, String cpf, String telefone,
                    LocalDate dataNascimento, BigDecimal rendaMensal,
-                   LocalDateTime dataAtualizacao, List<Contas> contas) {
+                   LocalDateTime dataAtualizacao, List<Contas> contas, Boolean ativo) {
         this.id = id;
         this.nome = nome;
         this.sobrenome = sobrenome;
@@ -55,12 +56,13 @@ public class Usuario {
         this.dataCadastro = LocalDateTime.now();
         this.dataAtualizacao = dataAtualizacao;
         this.contas = contas;
+        this.ativo = ativo;
     }
 
     // SEM ID
     public Usuario(String nome, String sobrenome, String email, String senha, String cpf, String telefone,
                    LocalDate dataNascimento, BigDecimal rendaMensal,
-                   List<Contas> contas, LocalDateTime dataAtualizacao) {
+                   List<Contas> contas, LocalDateTime dataAtualizacao, Boolean ativo) {
         this.nome = nome;
         this.sobrenome = sobrenome;
         setEmail(email);
@@ -72,6 +74,7 @@ public class Usuario {
         this.dataCadastro = LocalDateTime.now();
         this.dataAtualizacao = dataAtualizacao;
         this.contas = contas;
+        this.ativo = ativo;
     }
 
     // Getters e Setters
@@ -184,6 +187,14 @@ public class Usuario {
 
     public void setContas(List<Contas> contas) {
         this.contas = contas;
+    }
+
+    public Boolean getAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
     }
 
     // Equals e HashCode
