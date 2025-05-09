@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de Cadastro</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #4CAF50;
+            font-size: 24px;
+        }
+
+        p {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #555;
+        }
+
+        .message {
+            font-size: 22px;
+            font-weight: bold;
+            color: #007BFF;
+        }
+
+        .error-message {
+            font-size: 22px;
+            font-weight: bold;
+            color: #FF5733;
+        }
+
+        .loading {
+            font-size: 18px;
+            color: #555;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="message">Confirmando...</h1>
+        <p class="loading" id="loadingMessage">Por favor, aguarde enquanto processamos sua confirmação...</p>
+        <div id="resultMessage" class="message"></div>
+    </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        if (token) {
+            document.getElementById('message').innerText = "Cadastro confirmado com sucesso!";
+        } else {
+            document.getElementById('message').innerText = "Token inválido ou expirado!";
+        }
+    </script>
+</body>
+</html>
