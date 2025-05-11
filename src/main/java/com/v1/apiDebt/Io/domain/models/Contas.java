@@ -1,10 +1,12 @@
 package com.v1.apiDebt.Io.domain.models;
 
 import com.v1.apiDebt.Io.domain.enums.CategoriasEnum;
+import com.v1.apiDebt.Io.domain.enums.StatusContaEnum;
 import com.v1.apiDebt.Io.domain.enums.TipoPagamentoEnum;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class Contas {
 
@@ -17,33 +19,49 @@ public class Contas {
     private CategoriasEnum categoria;
     private LocalDateTime dataCriacao;
     private LocalDateTime dataAtualizacao;
+    private LocalDateTime dataVencimento;
     private Usuario usuario;
+    private boolean contaRecorrente = false;
+    private StatusContaEnum statusConta;
 
     // Construtores
     public Contas(Long id, String cpfUsuario, String nomeCompra, BigDecimal valor, TipoPagamentoEnum tipoPagamento,
-                  CategoriasEnum categoria, LocalDateTime dataAtualizacao, Usuario usuario) {
+                  CategoriasEnum categoria, LocalDateTime dataCriacao, LocalDateTime dataAtualizacao,
+                  LocalDateTime dataVencimento, Usuario usuario, boolean contaRecorrente, StatusContaEnum statusConta) {
         this.id = id;
         this.cpfUsuario = cpfUsuario;
         this.nomeCompra = nomeCompra;
         this.valor = valor;
         this.tipoPagamento = tipoPagamento;
         this.categoria = categoria;
-        this.dataCriacao = LocalDateTime.now();
+        this.dataCriacao = dataCriacao;
         this.dataAtualizacao = dataAtualizacao;
+        this.dataVencimento = dataVencimento;
         this.usuario = usuario;
+        this.contaRecorrente = contaRecorrente;
+        this.statusConta = statusConta;
     }
 
     // Sem ID
     public Contas(String cpfUsuario, String nomeCompra, BigDecimal valor, TipoPagamentoEnum tipoPagamento,
-                  CategoriasEnum categoria, LocalDateTime dataAtualizacao, Usuario usuario) {
+                  CategoriasEnum categoria, LocalDateTime dataCriacao, LocalDateTime dataAtualizacao,
+                  LocalDateTime dataVencimento, Usuario usuario, boolean contaRecorrente, StatusContaEnum statusConta) {
         this.cpfUsuario = cpfUsuario;
         this.nomeCompra = nomeCompra;
         this.valor = valor;
         this.tipoPagamento = tipoPagamento;
         this.categoria = categoria;
-        this.dataCriacao = LocalDateTime.now();
+        this.dataCriacao = dataCriacao;
         this.dataAtualizacao = dataAtualizacao;
+        this.dataVencimento = dataVencimento;
         this.usuario = usuario;
+        this.contaRecorrente = contaRecorrente;
+        this.statusConta = statusConta;
+    }
+
+    // Construtor vazio
+    public Contas() {
+
     }
 
     // Getters e Setters
@@ -111,11 +129,51 @@ public class Contas {
         this.dataAtualizacao = dataAtualizacao;
     }
 
+    public LocalDateTime getDataVencimento() {
+        return dataVencimento;
+    }
+
+    public void setDataVencimento(LocalDateTime dataVencimento) {
+        this.dataVencimento = dataVencimento;
+    }
+
     public Usuario getUsuario() {
         return usuario;
     }
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public boolean isContaRecorrente() {
+        return contaRecorrente;
+    }
+
+    public void setContaRecorrente(boolean contaRecorrente) {
+        this.contaRecorrente = contaRecorrente;
+    }
+
+    public StatusContaEnum getStatusConta() {
+        return statusConta;
+    }
+
+    public void setStatusConta(StatusContaEnum statusConta) {
+        this.statusConta = statusConta;
+    }
+
+    // Equals e HashCode
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Contas contas = (Contas) o;
+
+        return Objects.equals(id, contas.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 }
