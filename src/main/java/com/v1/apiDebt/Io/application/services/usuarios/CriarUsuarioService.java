@@ -1,7 +1,6 @@
-package com.v1.apiDebt.Io.application.services;
+package com.v1.apiDebt.Io.application.services.usuarios;
 
-import com.v1.apiDebt.Io.application.mappers.UsuarioMapper;
-import com.v1.apiDebt.Io.application.ports.input.usuario.AtualizarUsuarioUseCase;
+import com.v1.apiDebt.Io.application.ports.input.usuario.CriarUsuarioUseCase;
 import com.v1.apiDebt.Io.application.ports.output.UsuarioRepositoryPort;
 import com.v1.apiDebt.Io.application.ports.output.disponibilidade.DisponibilidadeCpfPort;
 import com.v1.apiDebt.Io.application.ports.output.disponibilidade.DisponibilidadeEmailPort;
@@ -9,28 +8,26 @@ import com.v1.apiDebt.Io.domain.models.Usuario;
 import com.v1.apiDebt.Io.exceptions.CpfRegistradoException;
 import com.v1.apiDebt.Io.exceptions.EmailCadastradoException;
 
-import static com.v1.apiDebt.Io.domain.enums.ErrorCodeEnum.USR009;
-import static com.v1.apiDebt.Io.domain.enums.ErrorCodeEnum.USR010;
+import static com.v1.apiDebt.Io.domain.enums.ErrorCodeEnum.*;
 
-public class AtualizarUsuarioService implements AtualizarUsuarioUseCase {
+public class CriarUsuarioService implements CriarUsuarioUseCase {
     // Injeção de dependência
     private final UsuarioRepositoryPort usuarioRepository;
     private final DisponibilidadeCpfPort disponibilidadeCpfPort;
     private final DisponibilidadeEmailPort disponibilidadeEmailPort;
 
-    public AtualizarUsuarioService(UsuarioRepositoryPort usuarioRepository,
-                                   DisponibilidadeCpfPort disponibilidadeCpfPort,
-                                   DisponibilidadeEmailPort disponibilidadeEmailPort) {
+    public CriarUsuarioService(UsuarioRepositoryPort usuarioRepository, DisponibilidadeCpfPort disponibilidadeCpfPort,
+                               DisponibilidadeEmailPort disponibilidadeEmailPort) {
         this.usuarioRepository = usuarioRepository;
         this.disponibilidadeCpfPort = disponibilidadeCpfPort;
         this.disponibilidadeEmailPort = disponibilidadeEmailPort;
     }
 
     @Override
-    public Usuario atualizar(Usuario usuario) {
+    public Usuario criar(Usuario usuario) {
         validarDisponibilidadeCpf(usuario.getCpf());
         validarDisponibilidadeEmail(usuario.getEmail());
-        return usuarioRepository.atualizar(usuario);
+        return usuarioRepository.salvar(usuario);
     }
 
     // Métodos auxiliares

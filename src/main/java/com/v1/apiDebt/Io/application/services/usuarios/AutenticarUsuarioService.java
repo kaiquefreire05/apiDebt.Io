@@ -1,4 +1,4 @@
-package com.v1.apiDebt.Io.application.services;
+package com.v1.apiDebt.Io.application.services.usuarios;
 
 import com.v1.apiDebt.Io.application.ports.input.usuario.AutenticarUsuarioUseCase;
 import com.v1.apiDebt.Io.application.ports.output.UsuarioRepositoryPort;

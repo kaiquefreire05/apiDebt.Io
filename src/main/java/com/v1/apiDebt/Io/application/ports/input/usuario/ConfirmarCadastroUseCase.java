@@ -1,5 +1,7 @@
 package com.v1.apiDebt.Io.application.ports.input.usuario;
 
+import java.util.UUID;
+
 public interface ConfirmarCadastroUseCase {
-    // TODO: Implementar a lógica de confirmação de cadastro, porém isso não é uma prioridade no momento.
+    boolean confirmarCadastro(String token);
 }
