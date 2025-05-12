@@ -1,0 +1,3 @@
+ALTER TABLE contas
+ADD COLUMN conta_recorrente BOOLEAN DEFAULT FALSE,
+ADD COLUMN status_conta VARCHAR(100);
