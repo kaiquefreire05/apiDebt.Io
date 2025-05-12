@@ -25,36 +25,45 @@ public class TokenService {
     @Value("${expiration-time}")
     private Integer expiration;
 
+    @Value("${EXPIRATION_TIME_ACCOUNT}")
+    private Integer expirationConfirmacaoConta;
+
     private final EntradaLogService logService;
 
     public TokenService(EntradaLogService logService) {
         this.logService = logService;
     }
 
-    public String gerarToken(String username) {
+    public String gerarToken(String username, boolean isAccountConfirmation) {
+        Instant expirationDate = isAccountConfirmation
+                ? generateAccountConfirmationExpirationDate()
+                : generateLoginExpirationDate();
+
         return JWT.create()
                 .withSubject(username)
-                .withExpiresAt(generateExpirationDate())
+                .withExpiresAt(expirationDate)
                 .withIssuer("debt.Io-Api")
                 .sign(Algorithm.HMAC256(secret));
     }
 
     public String validarToken(String token) {
-        try {
-            return JWT.require(Algorithm.HMAC256(secret))
+        return JWT.require(Algorithm.HMAC256(secret))
                     .withIssuer("debt.Io-Api")
                     .build()
                     .verify(token)
                     .getSubject();
-        } catch (JWTVerificationException ex) {
-            logService.saveLog("ERROR", "TokenService", "Erro ao validar token", ex.getMessage());
-            return null;
-        }
     }
 
-    private Instant generateExpirationDate() {
+    private Instant generateLoginExpirationDate() {
         ZonedDateTime tempoExpiracao = ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(expiration);
-        logService.saveLog("INFO", "TokenService", "Valor de tempo de expiração do token: "
+        logService.saveLog("INFO", "TokenService", "Valor de tempo de expiração do token de login: "
+                + tempoExpiracao, null);
+        return tempoExpiracao.toInstant();
+    }
+
+    private Instant generateAccountConfirmationExpirationDate() {
+        ZonedDateTime tempoExpiracao = ZonedDateTime.now(ZoneOffset.UTC).plusSeconds(expirationConfirmacaoConta);
+        logService.saveLog("INFO", "TokenService", "Valor de tempo de expiração do token de confirmação de conta: "
                 + tempoExpiracao, null);
         return tempoExpiracao.toInstant();
     }
