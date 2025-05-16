@@ -19,6 +19,11 @@ public enum ErrorCodeEnum {
     MAP002("MAP002", "Ocorreu um erro ao aplicar um Mapper de usuário, método: deEntidadeParaDominio."),
     MAP003("MAP003", "Ocorreu um erro ao aplicar um Mapper de contas, método: deDominioParaEntidade."),
     MAP004("MAP004", "Ocorreu um erro ao aplicar um Mapper de contas, método: deEntidadeParaDominio."),
+
+    //Erros de Contas
+    CON001("CON001", "Ocorreu um erro na rotina de criação de contas."),
+    CON002("CON002", "Conta não encontrada."),
+
     TESTE_PRA_FINALIZAR("Teste nesse caralho", "Teste nesse caralho");
 
      // Atributos
