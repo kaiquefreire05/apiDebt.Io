@@ -77,6 +77,11 @@ public class Usuario {
         this.ativo = ativo;
     }
 
+    // Construtor para criar um usuário com ID
+    public Usuario(UUID id) {
+        this.id = id;
+    }
+
     // Getters e Setters
     public UUID getId() {
         return id;
