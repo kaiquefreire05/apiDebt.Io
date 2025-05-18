@@ -5,6 +5,7 @@ import com.v1.apiDebt.Io.domain.enums.StatusContaEnum;
 import com.v1.apiDebt.Io.domain.enums.TipoPagamentoEnum;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -19,15 +20,18 @@ public class Contas {
     private CategoriasEnum categoria;
     private LocalDateTime dataCriacao;
     private LocalDateTime dataAtualizacao;
-    private LocalDateTime dataVencimento;
+    private LocalDate dataVencimento;
     private Usuario usuario;
     private boolean contaRecorrente = false;
     private StatusContaEnum statusConta;
+    private Long codigoRecorrencia;
+    private LocalDateTime dataPagamento;
 
     // Construtores
     public Contas(Long id, String cpfUsuario, String nomeCompra, BigDecimal valor, TipoPagamentoEnum tipoPagamento,
                   CategoriasEnum categoria, LocalDateTime dataCriacao, LocalDateTime dataAtualizacao,
-                  LocalDateTime dataVencimento, Usuario usuario, boolean contaRecorrente, StatusContaEnum statusConta) {
+                  LocalDate dataVencimento, Usuario usuario, boolean contaRecorrente,
+                  StatusContaEnum statusConta, Long codigoRecorrencia, LocalDateTime dataPagamento) {
         this.id = id;
         this.cpfUsuario = cpfUsuario;
         this.nomeCompra = nomeCompra;
@@ -40,12 +44,16 @@ public class Contas {
         this.usuario = usuario;
         this.contaRecorrente = contaRecorrente;
         this.statusConta = statusConta;
+        this.codigoRecorrencia = codigoRecorrencia;
+        this.dataPagamento = dataPagamento;
     }
+
 
     // Sem ID
     public Contas(String cpfUsuario, String nomeCompra, BigDecimal valor, TipoPagamentoEnum tipoPagamento,
                   CategoriasEnum categoria, LocalDateTime dataCriacao, LocalDateTime dataAtualizacao,
-                  LocalDateTime dataVencimento, Usuario usuario, boolean contaRecorrente, StatusContaEnum statusConta) {
+                  LocalDate dataVencimento, Usuario usuario, boolean contaRecorrente, StatusContaEnum statusConta,
+                  Long codigoRecorrencia, LocalDateTime dataPagamento) {
         this.cpfUsuario = cpfUsuario;
         this.nomeCompra = nomeCompra;
         this.valor = valor;
@@ -57,6 +65,8 @@ public class Contas {
         this.usuario = usuario;
         this.contaRecorrente = contaRecorrente;
         this.statusConta = statusConta;
+        this.codigoRecorrencia = codigoRecorrencia;
+        this.dataPagamento = dataPagamento;
     }
 
     // Construtor vazio
@@ -129,11 +139,11 @@ public class Contas {
         this.dataAtualizacao = dataAtualizacao;
     }
 
-    public LocalDateTime getDataVencimento() {
+    public LocalDate getDataVencimento() {
         return dataVencimento;
     }
 
-    public void setDataVencimento(LocalDateTime dataVencimento) {
+    public void setDataVencimento(LocalDate dataVencimento) {
         this.dataVencimento = dataVencimento;
     }
 
@@ -159,6 +169,22 @@ public class Contas {
 
     public void setStatusConta(StatusContaEnum statusConta) {
         this.statusConta = statusConta;
+    }
+
+    public Long getCodigoRecorrencia() {
+        return codigoRecorrencia;
+    }
+
+    public void setCodigoRecorrencia(Long codigoRecorrencia) {
+        this.codigoRecorrencia = codigoRecorrencia;
+    }
+
+    public LocalDateTime getDataPagamento() {
+        return dataPagamento;
+    }
+
+    public void setDataPagamento(LocalDateTime dataPagamento) {
+        this.dataPagamento = dataPagamento;
     }
 
     // Equals e HashCode

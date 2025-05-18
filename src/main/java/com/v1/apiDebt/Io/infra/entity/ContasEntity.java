@@ -1,6 +1,7 @@
 package com.v1.apiDebt.Io.infra.entity;
 
 import com.v1.apiDebt.Io.domain.enums.CategoriasEnum;
+import com.v1.apiDebt.Io.domain.enums.StatusContaEnum;
 import com.v1.apiDebt.Io.domain.enums.TipoPagamentoEnum;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
@@ -13,6 +14,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -57,14 +59,31 @@ public class ContasEntity {
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
 
+    @Column(name = "data_vencimento", nullable = false)
+    private LocalDate dataVencimento;
+
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private UsuarioEntity usuario;
 
+    @Column(name = "conta_recorrente", nullable = false)
+    private boolean contaRecorrente;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_conta", nullable = false, length = 100)
+    private StatusContaEnum statusConta;
+
+    @Column(name = "codigo_recorrencia")
+    private Long codigoRecorrencia;
+
+    @Column(name = "data_pagamento", nullable = true)
+    private LocalDateTime dataPagamento;
+
     // Construtor sem ID
     public ContasEntity(String cpfUsuario, String nomeCompra, BigDecimal valor, TipoPagamentoEnum tipoPagamento,
-                        CategoriasEnum categoria, LocalDateTime dataCriacao,
-                        LocalDateTime dataAtualizacao, UsuarioEntity usuario) {
+                        CategoriasEnum categoria, LocalDateTime dataCriacao, LocalDateTime dataAtualizacao,
+                        LocalDate dataVencimento, UsuarioEntity usuario, boolean contaRecorrente,
+                        StatusContaEnum statusConta, Long codigoRecorrencia, LocalDateTime dataPagamento) {
         this.cpfUsuario = cpfUsuario;
         this.nomeCompra = nomeCompra;
         this.valor = valor;
@@ -72,6 +91,11 @@ public class ContasEntity {
         this.categoria = categoria;
         this.dataCriacao = dataCriacao;
         this.dataAtualizacao = dataAtualizacao;
+        this.dataVencimento = dataVencimento;
         this.usuario = usuario;
+        this.contaRecorrente = contaRecorrente;
+        this.statusConta = statusConta;
+        this.codigoRecorrencia = codigoRecorrencia;
+        this.dataPagamento = dataPagamento;
     }
 }
