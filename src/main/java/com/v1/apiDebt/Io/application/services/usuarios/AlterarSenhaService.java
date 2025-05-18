@@ -2,6 +2,7 @@ package com.v1.apiDebt.Io.application.services.usuarios;
 
 import com.v1.apiDebt.Io.application.ports.input.usuario.AlterarSenhaUseCase;
 import com.v1.apiDebt.Io.application.ports.output.UsuarioRepositoryPort;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
