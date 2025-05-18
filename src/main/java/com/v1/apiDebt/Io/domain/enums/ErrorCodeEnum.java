@@ -23,6 +23,7 @@ public enum ErrorCodeEnum {
     //Erros de Contas
     CON001("CON001", "Ocorreu um erro na rotina de criação de contas."),
     CON002("CON002", "Conta não encontrada."),
+    CON003("CON003", "Ocorreu um erro na rotina de atualização de conta."),
 
     TESTE_PRA_FINALIZAR("Teste nesse caralho", "Teste nesse caralho");
 
