@@ -1,0 +1,5 @@
+ALTER TABLE contas
+ADD COLUMN data_pagamento TIMESTAMP WITHOUT TIME ZONE;
+
+ALTER TABLE contas
+ALTER COLUMN data_vencimento TYPE DATE;

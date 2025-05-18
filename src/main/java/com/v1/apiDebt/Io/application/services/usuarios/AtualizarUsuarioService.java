@@ -7,6 +7,7 @@ import com.v1.apiDebt.Io.application.ports.output.disponibilidade.Disponibilidad
 import com.v1.apiDebt.Io.domain.models.Usuario;
 import com.v1.apiDebt.Io.exceptions.CpfRegistradoException;
 import com.v1.apiDebt.Io.exceptions.EmailCadastradoException;
+import org.springframework.stereotype.Service;
 
 import static com.v1.apiDebt.Io.domain.enums.ErrorCodeEnum.USR009;
 import static com.v1.apiDebt.Io.domain.enums.ErrorCodeEnum.USR010;
