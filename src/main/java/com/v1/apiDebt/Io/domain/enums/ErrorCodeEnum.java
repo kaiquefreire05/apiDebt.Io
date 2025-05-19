@@ -24,6 +24,7 @@ public enum ErrorCodeEnum {
     CON001("CON001", "Ocorreu um erro na rotina de criação de contas."),
     CON002("CON002", "Conta não encontrada."),
     CON003("CON003", "Ocorreu um erro na rotina de atualização de conta."),
+    CON004("CON004", "Ocorreu um erro na rotina de obter total gasto mês."),
 
     TESTE_PRA_FINALIZAR("Teste nesse caralho", "Teste nesse caralho");
 

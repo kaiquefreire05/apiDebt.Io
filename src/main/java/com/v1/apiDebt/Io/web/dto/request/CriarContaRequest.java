@@ -7,16 +7,16 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public record CriarContaRequest(
-        @NotBlank String cpfUsuario,
+        @NotNull UUID usuarioId,
         @NotBlank String nomeCompra,
         @NotNull @Positive BigDecimal valor,
-        @NotBlank TipoPagamentoEnum tipoPagamento,
-        @NotBlank CategoriasEnum categoria,
-        @NotNull String dataVencimento,
-        @NotNull UUID usuarioId,
-        @NotNull boolean contaRecorrente
+        @NotNull TipoPagamentoEnum tipoPagamento,
+        @NotNull CategoriasEnum categoria,
+        @NotNull LocalDate dataVencimento,
+        @NotNull Boolean contaRecorrente
 ) {
 }

@@ -1,5 +1,5 @@
 CREATE TABLE contas (
-    id BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     cpf_usuario VARCHAR(11) NOT NULL,
     nome_compra VARCHAR(150) NOT NULL,
     valor NUMERIC(10,2) NOT NULL,

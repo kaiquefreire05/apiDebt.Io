@@ -22,7 +22,7 @@ public class Contas {
     private LocalDateTime dataAtualizacao;
     private LocalDate dataVencimento;
     private Usuario usuario;
-    private boolean contaRecorrente = false;
+    private Boolean contaRecorrente = false;
     private StatusContaEnum statusConta;
     private Long codigoRecorrencia;
     private LocalDateTime dataPagamento;

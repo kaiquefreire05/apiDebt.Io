@@ -33,4 +33,20 @@ public class ContasConfig {
     public BuscarContaPorIdUseCase buscarContaPorIdUseCase(ContasRepositoryPort contasRepositoryPort) {
         return new BuscarContaPorIdService(contasRepositoryPort);
     }
+
+    @Bean
+    public AlterarStatusContaUseCase alterarStatusContaUseCase(ContasRepositoryPort contasRepositoryPort) {
+        return new AlterarStatusContaService(contasRepositoryPort);
+    }
+
+    @Bean
+    public ObterTotalGastoMesUseCase obterTotalGastoMesUseCase(ContasRepositoryPort contasRepositoryPort) {
+        return new ObterTotalGastoMesService(contasRepositoryPort);
+    }
+
+    @Bean
+    public SaldoRestanteUseCase saldoRestanteUseCase(ContasRepositoryPort contasRepositoryPort) {
+        return new SaldoRestanteService(contasRepositoryPort);
+    }
+
 }

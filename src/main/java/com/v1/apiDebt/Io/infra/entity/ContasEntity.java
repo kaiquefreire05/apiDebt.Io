@@ -30,11 +30,11 @@ public class ContasEntity {
     private Long id;
 
     @NotNull(message = "O CPF não pode ser nulo.")
-    @Column(name = "cpf_usuario", nullable = false, length = 11, unique = true)
+    @Column(name = "cpf_usuario", nullable = false, length = 11, unique = false)
     private String cpfUsuario;
 
     @NotEmpty(message = "O nome não pode ser vazio.")
-    @Size(min = 5, max = 150, message = "O nome deve ter entre 3 e 150 caracteres.")
+    @Size(min = 3, max = 150, message = "O nome deve ter entre 3 e 150 caracteres.")
     @Column(name = "nome_compra", nullable = false, length = 150)
     private String nomeCompra;
 
@@ -42,7 +42,7 @@ public class ContasEntity {
     @Column(name = "valor", nullable = false, precision = 10, scale = 2)
     private BigDecimal valor;
 
-    @NotEmpty(message = "O tipo de pagamento não pode ser vazio.")
+    @NotNull(message = "O tipo de pagamento não pode ser nulo.")
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_pagamento", nullable = false)
     private TipoPagamentoEnum tipoPagamento;

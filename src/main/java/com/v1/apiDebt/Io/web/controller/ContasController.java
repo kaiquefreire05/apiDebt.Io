@@ -10,11 +10,13 @@ import com.v1.apiDebt.Io.web.dto.request.CriarContaRequest;
 import com.v1.apiDebt.Io.web.dto.response.BaseResponse;
 import com.v1.apiDebt.Io.web.dto.response.ContasResponse;
 import com.v1.apiDebt.Io.web.factory.BaseResponseFactory;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,23 +32,32 @@ public class ContasController {
     private final ListarContasUsuarioUseCase listarContasUsuarioUseCase;
     private final BuscarContaPorIdUseCase buscarContaPorIdUseCase;
     private final EntradaLogService logService;
+    private final AlterarStatusContaUseCase alterarStatusContaUseCase;
+    private final ObterTotalGastoMesUseCase obterTotalGastoMesUseCase;
+    private final SaldoRestanteUseCase saldoRestanteUseCase;
 
     public ContasController(AtualizarContaUseCase atualizarContaUseCase, CriarContaUseCase criarContaUseCase,
                             DeletarContaUseCase deletarContaUseCase,
                             ListarContasUsuarioUseCase listarContasUsuarioUseCase,
                             BuscarContaPorIdUseCase buscarContaPorIdUseCase,
-                            EntradaLogService logService) {
+                            EntradaLogService logService,
+                            AlterarStatusContaUseCase alterarStatusContaUseCase,
+                            ObterTotalGastoMesUseCase obterTotalGastoMesUseCase,
+                            SaldoRestanteUseCase saldoRestanteUseCase) {
         this.atualizarContaUseCase = atualizarContaUseCase;
         this.criarContaUseCase = criarContaUseCase;
         this.deletarContaUseCase = deletarContaUseCase;
         this.listarContasUsuarioUseCase = listarContasUsuarioUseCase;
         this.buscarContaPorIdUseCase = buscarContaPorIdUseCase;
         this.logService = logService;
+        this.alterarStatusContaUseCase = alterarStatusContaUseCase;
+        this.obterTotalGastoMesUseCase = obterTotalGastoMesUseCase;
+        this.saldoRestanteUseCase = saldoRestanteUseCase;
     }
 
     @PostMapping("/criar")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<List<ContasResponse>>> criarConta(CriarContaRequest request) {
+    public ResponseEntity<BaseResponse<List<ContasResponse>>> criarConta(@RequestBody @Valid CriarContaRequest request) {
         if (request == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(BaseResponseFactory.falha("Requisição inválida. Verifique os dados enviados."));
@@ -54,14 +65,14 @@ public class ContasController {
 
         // Criando nova conta
         Contas novaConta = new Contas(
-                request.cpfUsuario(),
+                null,
                 request.nomeCompra(),
                 request.valor(),
                 request.tipoPagamento(),
                 request.categoria(),
                 LocalDateTime.now(),
                 null,
-                LocalDate.parse(request.dataVencimento()),
+                request.dataVencimento(),
                 new Usuario(request.usuarioId()),
                 request.contaRecorrente(),
                 StatusContaEnum.PENDENTE,
@@ -80,6 +91,7 @@ public class ContasController {
                         conta.getDataVencimento(),
                         conta.getDataPagamento(),
                         conta.isContaRecorrente(),
+                        conta.getStatusConta(),
                         conta.getDataCriacao(),
                         conta.getDataAtualizacao()
                 ))
@@ -91,9 +103,9 @@ public class ContasController {
 
     }
 
-    @PostMapping("/atualizar")
+    @PutMapping("/atualizar")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<ContasResponse>> atualizarConta(AtualizarContaRequest request) {
+    public ResponseEntity<BaseResponse<ContasResponse>> atualizarConta(@RequestBody @Valid AtualizarContaRequest request) {
         if (request == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(BaseResponseFactory.falha("Requisição inválida. Verifique os dados enviados."));
@@ -125,6 +137,7 @@ public class ContasController {
                 contaAtualizada.getDataVencimento(),
                 contaAtualizada.getDataPagamento(),
                 contaAtualizada.isContaRecorrente(),
+                contaAtualizada.getStatusConta(),
                 contaExistente.getDataCriacao(),
                 contaAtualizada.getDataAtualizacao()
         );
@@ -177,6 +190,7 @@ public class ContasController {
                             conta.getDataVencimento(),
                             conta.getDataPagamento(),
                             conta.isContaRecorrente(),
+                            conta.getStatusConta(),
                             conta.getDataCriacao(),
                             conta.getDataAtualizacao()
                     ))
@@ -186,6 +200,88 @@ public class ContasController {
 
         } catch (Exception ex) {
             String mensagemErro = "Erro ao listar contas. Método: listarContasPorUsuario::ContasController";
+            logService.saveLog("ERROR", "ContasController", mensagemErro, ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(BaseResponseFactory.falha(ex.getMessage()));
+        }
+    }
+
+    @PutMapping("alterar-status/{id}/{status}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<ContasResponse>> alterarStatusConta(@PathVariable Long id,
+                                                                           @PathVariable StatusContaEnum status) {
+        if (id == null || id.toString().isEmpty() || status == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(BaseResponseFactory.falha("Dados da requisição inválidos. Verifique os dados enviados."));
+        }
+
+        try {
+            Contas conta = buscarContaPorIdUseCase.buscarPorId(id);
+            if (conta == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(BaseResponseFactory.falha("Conta não encontrada."));
+            }
+
+            // Alterando o status da conta
+            Contas contaAtualizada = alterarStatusContaUseCase.alterarStatusConta(id, status);
+
+            ContasResponse response = new ContasResponse(
+                    contaAtualizada.getNomeCompra(),
+                    contaAtualizada.getValor(),
+                    contaAtualizada.getTipoPagamento(),
+                    contaAtualizada.getCategoria(),
+                    contaAtualizada.getDataVencimento(),
+                    contaAtualizada.getDataPagamento(),
+                    contaAtualizada.isContaRecorrente(),
+                    contaAtualizada.getStatusConta(),
+                    contaAtualizada.getDataCriacao(),
+                    contaAtualizada.getDataAtualizacao()
+            );
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(BaseResponseFactory.sucesso(response, "Status da conta alterado com sucesso."));
+        } catch (Exception ex) {
+            String mensagemErro = "Erro ao alterar status conta. Método: alterarStatusConta::ContasController";
+            logService.saveLog("ERROR", "ContasController", mensagemErro, ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(BaseResponseFactory.falha(ex.getMessage()));
+        }
+    }
+
+    @GetMapping("total-gasto-mes/{usuarioId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<BigDecimal>> obterTotalGastoMes(@PathVariable UUID usuarioId) {
+        if (usuarioId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(BaseResponseFactory.falha("ID de usuário inválido. Verifique o ID enviado."));
+        }
+
+        try {
+            BigDecimal totalGasto = obterTotalGastoMesUseCase.obterTotalGastoMes(usuarioId);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(BaseResponseFactory.sucesso(totalGasto, "Total gasto no mês obtido com sucesso."));
+        } catch (Exception ex) {
+            String mensagemErro = "Erro ao obter total gasto no mês. Método: obterTotalGastoMes::ContasController";
+            logService.saveLog("ERROR", "ContasController", mensagemErro, ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(BaseResponseFactory.falha(ex.getMessage()));
+        }
+    }
+
+    @GetMapping("saldo-disponivel/{usuarioId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<BigDecimal>> obterSaldoRestante(@PathVariable UUID usuarioId) {
+        if (usuarioId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(BaseResponseFactory.falha("ID de usuário inválido. Verifique o ID enviado."));
+        }
+
+        try {
+            BigDecimal saldoRestante = saldoRestanteUseCase.somarGasto(usuarioId);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(BaseResponseFactory.sucesso(saldoRestante, "Saldo restante obtido com sucesso."));
+        } catch (Exception ex) {
+            String mensagemErro = "Erro ao obter saldo restante. Método: obterSaldoRestante::ContasController";
             logService.saveLog("ERROR", "ContasController", mensagemErro, ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(BaseResponseFactory.falha(ex.getMessage()));

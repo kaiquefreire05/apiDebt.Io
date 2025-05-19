@@ -12,10 +12,9 @@ public record AtualizarContaRequest(
         @NotNull Long id,
         @NotBlank String nomeCompra,
         @NotNull @Positive BigDecimal valor,
-        @NotBlank TipoPagamentoEnum tipoPagamento,
-        @NotBlank CategoriasEnum categoria,
+        @NotNull TipoPagamentoEnum tipoPagamento,
+        @NotNull CategoriasEnum categoria,
         @NotNull String dataVencimento,
-        //@NotNull UUID usuarioId,
-        @NotNull boolean contaRecorrente
+        @NotNull Boolean contaRecorrente
 ) {
 }

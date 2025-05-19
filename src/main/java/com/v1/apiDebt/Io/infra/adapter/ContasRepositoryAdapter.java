@@ -7,16 +7,12 @@ import com.v1.apiDebt.Io.domain.enums.CategoriasEnum;
 import com.v1.apiDebt.Io.domain.enums.StatusContaEnum;
 import com.v1.apiDebt.Io.domain.models.Contas;
 import com.v1.apiDebt.Io.domain.models.Usuario;
-import com.v1.apiDebt.Io.exceptions.ContaNaoEncontradaException;
-import com.v1.apiDebt.Io.exceptions.ErroAtualizacaoContaException;
-import com.v1.apiDebt.Io.exceptions.ErroCriacaoContaException;
-import com.v1.apiDebt.Io.exceptions.UsuarioNaoEncontradoException;
+import com.v1.apiDebt.Io.exceptions.*;
 import com.v1.apiDebt.Io.infra.entity.ContasEntity;
 import com.v1.apiDebt.Io.infra.jpaRepository.ContasJpaRepository;
-import com.v1.apiDebt.Io.infra.jpaRepository.UsuarioJpaRepository;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -54,6 +50,7 @@ public class ContasRepositoryAdapter implements ContasRepositoryPort {
                 logConsole.error("Usuário não encontrado");
                 throw new UsuarioNaoEncontradoException(USR006.getMessage(), USR006.getCode());
             }
+            contas.setCpfUsuario(usuarioEncontrado.getCpf());
 
             List<Contas> contasCriadas = new ArrayList<>();
 
@@ -62,7 +59,7 @@ public class ContasRepositoryAdapter implements ContasRepositoryPort {
                 Long codigoRecorrencia = ThreadLocalRandom.current().nextLong(1000000000L, 9999999999L);
                 for (int i = 0; i < 6; i++) {
                     Contas novaConta = new Contas(
-                            contas.getCpfUsuario(),
+                            usuarioEncontrado.getCpf(),
                             contas.getNomeCompra(),
                             contas.getValor(),
                             contas.getTipoPagamento(),
@@ -80,7 +77,8 @@ public class ContasRepositoryAdapter implements ContasRepositoryPort {
                     contasCriadas.add(contasMapper.deEntidadeParaDominio(entidadeSalva));
                 }
             } else {
-                ContasEntity entidadeSalva = contasRepository.save(contasMapper.deDominioParaEntidade(contas));
+                ContasEntity entityParaSalvar = contasMapper.deDominioParaEntidade(contas);
+                ContasEntity entidadeSalva = contasRepository.save(entityParaSalvar);
                 contasCriadas.add(contasMapper.deEntidadeParaDominio(entidadeSalva));
             }
             // Salvando log de sucesso e retornando contas criadas
@@ -89,9 +87,9 @@ public class ContasRepositoryAdapter implements ContasRepositoryPort {
             return contasCriadas;
 
         } catch (Exception ex) {
-            String mensagemErro = "Ocorreu um erro na rotina de criação de contas. Método: criar::" +
-                    "ContasRepositoryAdapter";
-            logService.saveLog("ERROR", "ContasRepositoryAdapter", mensagemErro, ex.toString());
+            String mensagemErro = "Ocorreu um erro na rotina de criação de contas. Método: criar" +
+                    "::ContasRepositoryAdapter";
+            logService.saveLog("ERROR", "ContasRepositoryAdapter", mensagemErro, ex.getMessage());
             throw new ErroCriacaoContaException(CON001.getMessage(), CON001.getCode());
         }
     }
@@ -146,8 +144,35 @@ public class ContasRepositoryAdapter implements ContasRepositoryPort {
 
             // Verificando se a conta é recorrente
             if (contaEntity.isContaRecorrente()) {
+
                 List<ContasEntity> recorrentes = contasRepository
                         .findAllByCodigoRecorrencia(contaEntity.getCodigoRecorrencia());
+
+                // Se a nova versão da conta NÃO for mais recorrente, exclui futuras
+                if (!contas.isContaRecorrente()) {
+                    for (ContasEntity recorrente : recorrentes) {
+                        if (recorrente.getDataVencimento().isAfter(LocalDate.now())
+                                && !recorrente.getId().equals(contaEntity.getId())) {
+                            contasRepository.delete(recorrente);
+                        }
+                    }
+
+                    // Atualiza a conta atual para não ser mais recorrente
+                    contaEntity.setNomeCompra(contas.getNomeCompra());
+                    contaEntity.setValor(contas.getValor());
+                    contaEntity.setTipoPagamento(contas.getTipoPagamento());
+                    contaEntity.setCategoria(contas.getCategoria());
+                    contaEntity.setStatusConta(contas.getStatusConta());
+                    contaEntity.setDataAtualizacao(LocalDateTime.now());
+                    contaEntity.setDataVencimento(contas.getDataVencimento());
+                    contaEntity.setContaRecorrente(false);
+
+                    ContasEntity contaAtualizada = contasRepository.save(contaEntity);
+                    logService.saveLog("INFO", "ContasRepositoryAdapter",
+                            "Conta recorrente desativada e recorrências futuras excluídas", null);
+                    return contasMapper.deEntidadeParaDominio(contaAtualizada);
+                }
+
                 for (ContasEntity recorrente : recorrentes) {
                     // Atualiza os dados da conta recorrente
                     recorrente.setNomeCompra(contas.getNomeCompra());
@@ -325,6 +350,68 @@ public class ContasRepositoryAdapter implements ContasRepositoryPort {
             String mensagemErro = "Erro ao buscar conta por usuário ID. Método: buscarPorUsuarioId::ContasRepositoryAdapter";
             logService.saveLog("ERROR", "ContasRepositoryAdapter", mensagemErro, ex.toString());
             return Optional.empty();
+        }
+    }
+
+    @Override
+    public BigDecimal obterTotalGastoMes(UUID usuarioId) {
+        try {
+            List<ContasEntity> contas = contasRepository.findAllByUsuarioId(usuarioId);
+            BigDecimal totalGasto = BigDecimal.ZERO;
+
+            for (ContasEntity conta : contas) {
+                if (conta.getDataVencimento().getMonthValue() == LocalDate.now().getMonthValue()) {
+                    totalGasto = totalGasto.add(conta.getValor());
+                }
+            }
+            return totalGasto;
+
+        } catch (Exception ex) {
+            String mensagemErro = "Erro ao obter total gasto no mês. Método: obterTotalGastoMes::ContasRepositoryAdapter";
+            logService.saveLog("ERROR", "ContasRepositoryAdapter", mensagemErro, ex.toString());
+            throw new ErroObterGastoMesException(CON004.getMessage(), CON004.getCode());
+        }
+    }
+
+    @Override
+    public BigDecimal gastoDisponivel(UUID usuarioId) {
+        try {
+            Usuario usuarioEncontrado = buscarUsuarioPorIdUseCase.buscarPorId(usuarioId);
+            if (usuarioEncontrado == null) {
+                logConsole.error("Usuário não encontrado");
+                throw new UsuarioNaoEncontradoException(USR006.getMessage(), USR006.getCode());
+            }
+            BigDecimal gastoTotal = obterTotalGastoMes(usuarioId);
+            BigDecimal limiteMensal = usuarioEncontrado.getRendaMensal();
+            BigDecimal gastoDisponivel = limiteMensal.subtract(gastoTotal);
+            return gastoDisponivel.max(BigDecimal.ZERO);
+
+        } catch (Exception ex) {
+            String mensagemErro = "Erro ao obter gasto disponível. Método: gastoDisponivel::ContasRepositoryAdapter";
+            logService.saveLog("ERROR", "ContasRepositoryAdapter", mensagemErro, ex.toString());
+            throw new ErroObterGastoMesException(CON004.getMessage(), CON004.getCode());
+        }
+    }
+
+    @Override
+    public Contas alterarStatus(Long contaId, StatusContaEnum status) {
+        try {
+            Optional<ContasEntity> contaEntity = contasRepository.findById(contaId);
+            if (contaEntity.isEmpty()) {
+                logConsole.error("Conta não encontrada::ContasRepositoryAdapter");
+                throw new ContaNaoEncontradaException(CON002.getMessage(), CON002.getCode());
+            }
+
+            ContasEntity contaAtualizada = contaEntity.get();
+            contaAtualizada.setStatusConta(status);
+            contaAtualizada.setDataAtualizacao(LocalDateTime.now());
+            ContasEntity entidadeSalva = contasRepository.save(contaAtualizada);
+            return contasMapper.deEntidadeParaDominio(entidadeSalva);
+
+        } catch (Exception ex) {
+            String mensagemErro = "Erro ao alterar status da conta. Método: alterarStatus::ContasRepositoryAdapter";
+            logService.saveLog("ERROR", "ContasRepositoryAdapter", mensagemErro, ex.toString());
+            throw new ErroAtualizacaoContaException(CON003.getMessage(), CON003.getCode());
         }
     }
 }
