@@ -262,7 +262,7 @@ public class UsuarioRepositoryAdapter implements UsuarioRepositoryPort {
 
             if (usuario.getFotoPerfil() != null) {
                 logConsole.info("Usuário já possui foto, ID: {}", id);
-                return false; // Ou lançar exceção, ou atualizar dependendo da regra
+                return false;
             }
 
             byte[] fotoBytes = java.util.Base64.getDecoder().decode(fotoBase64);

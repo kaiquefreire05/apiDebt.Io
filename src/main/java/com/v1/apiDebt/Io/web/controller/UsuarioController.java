@@ -11,6 +11,7 @@ import com.v1.apiDebt.Io.web.dto.request.AlterarSenhaRequest;
 import com.v1.apiDebt.Io.web.dto.request.AtualizarUsuarioRequest;
 import com.v1.apiDebt.Io.web.dto.response.BaseResponse;
 import com.v1.apiDebt.Io.web.dto.response.UsuarioResponse;
+import com.v1.apiDebt.Io.web.dto.response.UsuarioResponseFoto;
 import com.v1.apiDebt.Io.web.factory.BaseResponseFactory;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +39,6 @@ public class UsuarioController {
     private final ListarUsuariosUseCase listarUsuariosUseCase;
     private final AlterarSenhaUseCase alterarSenhaUseCase;
     private final EntradaLogService entradaLogService;
-    private final DisponibilidadeGastoPort disponibilidadeGastoPort;
     private final AdicionarFotoPerfilUseCase adicionarFotoPerfilUseCase;
     private final AlterarFotoPerfilUseCase alterarFotoPerfilUseCase;
 
@@ -48,7 +49,6 @@ public class UsuarioController {
                              ListarUsuariosUseCase listarUsuariosUseCase,
                              AlterarSenhaUseCase alterarSenhaUseCase,
                              EntradaLogService entradaLogService,
-                             DisponibilidadeGastoPort disponibilidadeGastoPort,
                              AdicionarFotoPerfilUseCase adicionarFotoPerfilUseCase,
                              AlterarFotoPerfilUseCase alterarFotoPerfilUseCase) {
         this.atualizarUsuarioUseCase = atualizarUsuarioUseCase;
@@ -58,7 +58,6 @@ public class UsuarioController {
         this.listarUsuariosUseCase = listarUsuariosUseCase;
         this.alterarSenhaUseCase = alterarSenhaUseCase;
         this.entradaLogService = entradaLogService;
-        this.disponibilidadeGastoPort = disponibilidadeGastoPort;
         this.adicionarFotoPerfilUseCase = adicionarFotoPerfilUseCase;
         this.alterarFotoPerfilUseCase = alterarFotoPerfilUseCase;
     }
@@ -131,7 +130,7 @@ public class UsuarioController {
 
     @GetMapping("/id/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<UsuarioResponse>> obterUsuarioPorId(@PathVariable UUID id) {
+    public ResponseEntity<BaseResponse<UsuarioResponseFoto>> obterUsuarioPorId(@PathVariable UUID id) {
         if (id == null || id.toString().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(BaseResponseFactory.falha("Requisição invalida, Verifique o ID enviado."));
@@ -139,7 +138,11 @@ public class UsuarioController {
 
         try {
             Usuario usuario = buscarUsuarioPorIdUseCase.buscarPorId(id);
-            UsuarioResponse response = new UsuarioResponse(
+            String fotoPerfilBase64 = usuario.getFotoPerfil() != null
+            ? Base64.getEncoder().encodeToString(usuario.getFotoPerfil())
+            : null;
+
+            UsuarioResponseFoto response = new UsuarioResponseFoto(
                     usuario.getId(),
                     usuario.getNome(),
                     usuario.getSobrenome(),
@@ -148,7 +151,8 @@ public class UsuarioController {
                     usuario.getTelefone(),
                     usuario.getDataNascimento(),
                     usuario.getRendaMensal(),
-                    usuario.getDataCadastro()
+                    usuario.getDataCadastro(),
+                    fotoPerfilBase64
             );
             return ResponseEntity.status(HttpStatus.OK)
                     .body(BaseResponseFactory.sucesso(response, "Usuario listado com sucesso"));
@@ -257,28 +261,6 @@ public class UsuarioController {
                     .body(BaseResponseFactory.falha(ex.getMessage()));
         }
 
-    }
-
-    @GetMapping("/verificar-gasto")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<Boolean>> verificarGasto(@RequestParam UUID id,
-                                                                @RequestParam BigDecimal valorAlvo) {
-        if (id == null || id.toString().isEmpty() || valorAlvo == null || valorAlvo.compareTo(BigDecimal.ZERO) <= 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(BaseResponseFactory.falha("Requisição inválida. Verifique o ID enviado."));
-        }
-
-        try {
-            boolean gastoDentroDoLimite = disponibilidadeGastoPort.verificarDisponibilidadeGasto(id, valorAlvo);
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(BaseResponseFactory.sucesso(gastoDentroDoLimite,
-                            "Verificação de gasto realizada com sucesso"));
-        } catch (Exception ex) {
-            String msg = "Ocorreu um erro ao verificar gasto";
-            entradaLogService.saveLog("ERROR", "UsuarioController", msg, ex.toString());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(BaseResponseFactory.falha(ex.getMessage()));
-        }
     }
 
     @PutMapping("/atualizar-foto")

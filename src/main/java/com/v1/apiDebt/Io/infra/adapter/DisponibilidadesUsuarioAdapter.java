@@ -46,7 +46,7 @@ public class DisponibilidadesUsuarioAdapter implements DisponibilidadeEmailPort,
 
         List<ContasEntity> contas = contasRepository.findAllByUsuarioId(id);
         if (contas.isEmpty()) {
-            return false;
+            return true;
         }
 
         LocalDate hoje = LocalDate.now();

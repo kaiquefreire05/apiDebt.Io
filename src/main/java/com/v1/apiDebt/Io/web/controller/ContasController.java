@@ -1,6 +1,7 @@
 package com.v1.apiDebt.Io.web.controller;
 
 import com.v1.apiDebt.Io.application.ports.input.contas.*;
+import com.v1.apiDebt.Io.application.ports.output.disponibilidade.DisponibilidadeGastoPort;
 import com.v1.apiDebt.Io.domain.enums.StatusContaEnum;
 import com.v1.apiDebt.Io.domain.models.Contas;
 import com.v1.apiDebt.Io.domain.models.Usuario;
@@ -35,6 +36,7 @@ public class ContasController {
     private final AlterarStatusContaUseCase alterarStatusContaUseCase;
     private final ObterTotalGastoMesUseCase obterTotalGastoMesUseCase;
     private final SaldoRestanteUseCase saldoRestanteUseCase;
+    private final DisponibilidadeGastoPort disponibilidadeGastoPort;
 
     public ContasController(AtualizarContaUseCase atualizarContaUseCase, CriarContaUseCase criarContaUseCase,
                             DeletarContaUseCase deletarContaUseCase,
@@ -43,7 +45,8 @@ public class ContasController {
                             EntradaLogService logService,
                             AlterarStatusContaUseCase alterarStatusContaUseCase,
                             ObterTotalGastoMesUseCase obterTotalGastoMesUseCase,
-                            SaldoRestanteUseCase saldoRestanteUseCase) {
+                            SaldoRestanteUseCase saldoRestanteUseCase,
+                            DisponibilidadeGastoPort disponibilidadeGastoPort) {
         this.atualizarContaUseCase = atualizarContaUseCase;
         this.criarContaUseCase = criarContaUseCase;
         this.deletarContaUseCase = deletarContaUseCase;
@@ -53,6 +56,7 @@ public class ContasController {
         this.alterarStatusContaUseCase = alterarStatusContaUseCase;
         this.obterTotalGastoMesUseCase = obterTotalGastoMesUseCase;
         this.saldoRestanteUseCase = saldoRestanteUseCase;
+        this.disponibilidadeGastoPort = disponibilidadeGastoPort;
     }
 
     @PostMapping("/criar")
@@ -283,6 +287,28 @@ public class ContasController {
         } catch (Exception ex) {
             String mensagemErro = "Erro ao obter saldo restante. Método: obterSaldoRestante::ContasController";
             logService.saveLog("ERROR", "ContasController", mensagemErro, ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(BaseResponseFactory.falha(ex.getMessage()));
+        }
+    }
+
+    @GetMapping("/verificar-gasto")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<Boolean>> verificarGasto(@RequestParam UUID id,
+                                                                @RequestParam BigDecimal valorAlvo) {
+        if (id == null || id.toString().isEmpty() || valorAlvo == null || valorAlvo.compareTo(BigDecimal.ZERO) <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(BaseResponseFactory.falha("Requisição inválida. Verifique o ID enviado."));
+        }
+
+        try {
+            boolean gastoDentroDoLimite = disponibilidadeGastoPort.verificarDisponibilidadeGasto(id, valorAlvo);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(BaseResponseFactory.sucesso(gastoDentroDoLimite,
+                            "Verificação de gasto realizada com sucesso"));
+        } catch (Exception ex) {
+            String msg = "Ocorreu um erro ao verificar gasto";
+            logService.saveLog("ERROR", "UsuarioController", msg, ex.toString());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(BaseResponseFactory.falha(ex.getMessage()));
         }
