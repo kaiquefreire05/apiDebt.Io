@@ -70,13 +70,22 @@ public class UsuarioEntity {
     @Column(name = "ativo", nullable = false)
     private Boolean ativo = false;
 
+    @Column(name = "percentual_gasto", nullable = false, precision = 5, scale = 2)
+    private BigDecimal percentualGastos;
+
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "foto_perfil", nullable = true, columnDefinition = "bytea")
+    private byte[] fotoPerfil;
+
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContasEntity> contas = new ArrayList<>();
 
     // Construtor sem ID
     public UsuarioEntity(String nome, String sobrenome, String email, String senha, String cpf, String telefone,
                          LocalDate dataNascimento, BigDecimal rendaMensal, LocalDateTime dataCadastro,
-                         LocalDateTime dataAtualizacao, Boolean ativo, List<ContasEntity> contas) {
+                         LocalDateTime dataAtualizacao, Boolean ativo, BigDecimal percentualGastos,
+                         byte[] fotoPerfil,
+                         List<ContasEntity> contas) {
         this.nome = nome;
         this.sobrenome = sobrenome;
         this.email = email;
@@ -88,6 +97,8 @@ public class UsuarioEntity {
         this.dataCadastro = dataCadastro;
         this.dataAtualizacao = dataAtualizacao;
         this.ativo = ativo;
+        this.percentualGastos = percentualGastos;
+        this.fotoPerfil = fotoPerfil;
         this.contas = contas;
     }
 }

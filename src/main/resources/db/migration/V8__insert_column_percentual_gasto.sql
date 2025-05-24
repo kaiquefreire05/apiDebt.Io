@@ -1,0 +1,2 @@
+ALTER TABLE usuarios
+ADD COLUMN percentual_gasto NUMERIC(5,2) DEFAULT 0.00;

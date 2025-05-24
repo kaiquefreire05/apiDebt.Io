@@ -248,4 +248,69 @@ public class UsuarioRepositoryAdapter implements UsuarioRepositoryPort {
             return false;
         }
     }
+
+    @Override
+    public boolean adicionarFotoPerfil(UUID id, String fotoBase64) {
+        try {
+            Optional<UsuarioEntity> usuarioOptional = repository.findById(id);
+            if (usuarioOptional.isEmpty()) {
+                logConsole.info("Usuário não encontrado para adicionar foto, ID: {}", id);
+                return false;
+            }
+
+            UsuarioEntity usuario = usuarioOptional.get();
+
+            if (usuario.getFotoPerfil() != null) {
+                logConsole.info("Usuário já possui foto, ID: {}", id);
+                return false; // Ou lançar exceção, ou atualizar dependendo da regra
+            }
+
+            byte[] fotoBytes = java.util.Base64.getDecoder().decode(fotoBase64);
+            usuario.setFotoPerfil(fotoBytes);
+            usuario.setDataAtualizacao(LocalDateTime.now());
+            repository.save(usuario);
+
+            logService.saveLog("INFO", "UsuarioRepositoryAdapter",
+                    "Foto adicionada com sucesso, ID: " + id, "");
+            return true;
+
+        } catch (Exception ex) {
+            logService.saveLog("ERROR", "UsuarioRepositoryAdapter",
+                    "Erro ao adicionar foto de perfil, método: adicionarFotoPerfil", ex.toString());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean alterarFotoPerfil(UUID id, String fotoBase64) {
+        try {
+            Optional<UsuarioEntity> usuarioOptional = repository.findById(id);
+            if (usuarioOptional.isEmpty()) {
+                logConsole.info("Usuário não encontrado para alterar foto, ID: {}", id);
+                return false;
+            }
+
+            UsuarioEntity usuario = usuarioOptional.get();
+
+            if (usuario.getFotoPerfil() == null) {
+                logConsole.info("Usuário não possui foto para alterar, ID: {}", id);
+                return adicionarFotoPerfil(id, fotoBase64);
+            }
+
+            byte[] fotoBytes = java.util.Base64.getDecoder().decode(fotoBase64);
+            usuario.setFotoPerfil(fotoBytes);
+            usuario.setDataAtualizacao(LocalDateTime.now());
+            repository.save(usuario);
+
+            logService.saveLog("INFO", "UsuarioRepositoryAdapter",
+                    "Foto alterada com sucesso, ID: " + id, "");
+            return true;
+
+        } catch (Exception ex) {
+            logService.saveLog("ERROR", "UsuarioRepositoryAdapter",
+                    "Erro ao alterar foto de perfil, método: alterarFotoPerfil", ex.toString());
+            return false;
+        }
+    }
+
 }

@@ -15,5 +15,7 @@ public record RegisterRequest(
     @NotBlank String cpf,
     @NotBlank String telefone,
     @NotNull LocalDate dataNascimento,
-    @NotNull @Positive BigDecimal rendaMensal
+    @NotNull @Positive BigDecimal rendaMensal,
+    @NotNull @Positive Integer percentualGastos,
+    String fotoPerfilBase64
 ) {}

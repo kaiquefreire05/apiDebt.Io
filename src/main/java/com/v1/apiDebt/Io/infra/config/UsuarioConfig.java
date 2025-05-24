@@ -1,11 +1,17 @@
 package com.v1.apiDebt.Io.infra.config;
 
+import com.v1.apiDebt.Io.application.ports.input.fotoPerfil.AdicionarFotoPerfilUseCase;
+import com.v1.apiDebt.Io.application.ports.input.fotoPerfil.AlterarFotoPerfilUseCase;
 import com.v1.apiDebt.Io.application.ports.input.usuario.*;
 import com.v1.apiDebt.Io.application.ports.output.UsuarioRepositoryPort;
 import com.v1.apiDebt.Io.application.ports.output.disponibilidade.DisponibilidadeCpfPort;
 import com.v1.apiDebt.Io.application.ports.output.disponibilidade.DisponibilidadeEmailPort;
+import com.v1.apiDebt.Io.application.ports.output.disponibilidade.DisponibilidadeGastoPort;
+import com.v1.apiDebt.Io.application.services.foto.AdicionarFotoPerfilService;
+import com.v1.apiDebt.Io.application.services.foto.AlterarFotoPerfilService;
 import com.v1.apiDebt.Io.application.services.usuarios.*;
 import com.v1.apiDebt.Io.infra.adapter.DisponibilidadesUsuarioAdapter;
+import com.v1.apiDebt.Io.infra.jpaRepository.ContasJpaRepository;
 import com.v1.apiDebt.Io.infra.jpaRepository.UsuarioJpaRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,13 +37,21 @@ public class UsuarioConfig {
     }
 
     @Bean
-    public DisponibilidadeCpfPort disponibilidadeCpfPort(UsuarioJpaRepository repository) {
-        return new DisponibilidadesUsuarioAdapter(repository);
+    public DisponibilidadeCpfPort disponibilidadeCpfPort(UsuarioJpaRepository repository,
+                                          ContasJpaRepository contasRepository) {
+        return new DisponibilidadesUsuarioAdapter(repository, contasRepository);
     }
 
     @Bean
-    public DisponibilidadeEmailPort disponibilidadeEmailPort(UsuarioJpaRepository repository) {
-        return new DisponibilidadesUsuarioAdapter(repository);
+    public DisponibilidadeEmailPort disponibilidadeEmailPort(UsuarioJpaRepository repository,
+                                          ContasJpaRepository contasRepository) {
+        return new DisponibilidadesUsuarioAdapter(repository, contasRepository);
+    }
+
+    @Bean
+    public DisponibilidadeGastoPort disponibilidadeGastoPort(UsuarioJpaRepository repository,
+                                          ContasJpaRepository contasRepository) {
+        return new DisponibilidadesUsuarioAdapter(repository, contasRepository);
     }
 
     @Bean
@@ -70,6 +84,16 @@ public class UsuarioConfig {
     @Bean
     public AlterarSenhaUseCase alterarSenhaUseCase(UsuarioRepositoryPort usuarioRepositoryPort) {
         return new AlterarSenhaService(usuarioRepositoryPort);
+    }
+
+    @Bean
+    public AdicionarFotoPerfilUseCase adicionarFotoPerfilUseCase(UsuarioRepositoryPort usuarioRepository) {
+        return new AdicionarFotoPerfilService(usuarioRepository);
+    }
+
+    @Bean
+    public AlterarFotoPerfilUseCase alterarFotoPerfilUseCase(UsuarioRepositoryPort usuarioRepository) {
+        return new AlterarFotoPerfilService(usuarioRepository);
     }
 
 }

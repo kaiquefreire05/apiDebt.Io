@@ -1,8 +1,12 @@
 package com.v1.apiDebt.Io.web.controller;
 
+import com.v1.apiDebt.Io.application.ports.input.fotoPerfil.AdicionarFotoPerfilUseCase;
+import com.v1.apiDebt.Io.application.ports.input.fotoPerfil.AlterarFotoPerfilUseCase;
 import com.v1.apiDebt.Io.application.ports.input.usuario.*;
+import com.v1.apiDebt.Io.application.ports.output.disponibilidade.DisponibilidadeGastoPort;
 import com.v1.apiDebt.Io.domain.models.Usuario;
 import com.v1.apiDebt.Io.infra.adapter.EntradaLogService;
+import com.v1.apiDebt.Io.web.dto.request.AlterarFotoRequest;
 import com.v1.apiDebt.Io.web.dto.request.AlterarSenhaRequest;
 import com.v1.apiDebt.Io.web.dto.request.AtualizarUsuarioRequest;
 import com.v1.apiDebt.Io.web.dto.response.BaseResponse;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +37,9 @@ public class UsuarioController {
     private final ListarUsuariosUseCase listarUsuariosUseCase;
     private final AlterarSenhaUseCase alterarSenhaUseCase;
     private final EntradaLogService entradaLogService;
+    private final DisponibilidadeGastoPort disponibilidadeGastoPort;
+    private final AdicionarFotoPerfilUseCase adicionarFotoPerfilUseCase;
+    private final AlterarFotoPerfilUseCase alterarFotoPerfilUseCase;
 
     public UsuarioController(AtualizarUsuarioUseCase atualizarUsuarioUseCase,
                              BuscarUsuarioPorEmailUseCase buscarUsuarioPorEmailUseCase,
@@ -39,7 +47,10 @@ public class UsuarioController {
                              DeletarUsuarioUseCase deletarUsuarioUseCase,
                              ListarUsuariosUseCase listarUsuariosUseCase,
                              AlterarSenhaUseCase alterarSenhaUseCase,
-                             EntradaLogService entradaLogService) {
+                             EntradaLogService entradaLogService,
+                             DisponibilidadeGastoPort disponibilidadeGastoPort,
+                             AdicionarFotoPerfilUseCase adicionarFotoPerfilUseCase,
+                             AlterarFotoPerfilUseCase alterarFotoPerfilUseCase) {
         this.atualizarUsuarioUseCase = atualizarUsuarioUseCase;
         this.buscarUsuarioPorEmailUseCase = buscarUsuarioPorEmailUseCase;
         this.buscarUsuarioPorIdUseCase = buscarUsuarioPorIdUseCase;
@@ -47,6 +58,9 @@ public class UsuarioController {
         this.listarUsuariosUseCase = listarUsuariosUseCase;
         this.alterarSenhaUseCase = alterarSenhaUseCase;
         this.entradaLogService = entradaLogService;
+        this.disponibilidadeGastoPort = disponibilidadeGastoPort;
+        this.adicionarFotoPerfilUseCase = adicionarFotoPerfilUseCase;
+        this.alterarFotoPerfilUseCase = alterarFotoPerfilUseCase;
     }
 
     @GetMapping("/todos")
@@ -243,5 +257,55 @@ public class UsuarioController {
                     .body(BaseResponseFactory.falha(ex.getMessage()));
         }
 
+    }
+
+    @GetMapping("/verificar-gasto")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<Boolean>> verificarGasto(@RequestParam UUID id,
+                                                                @RequestParam BigDecimal valorAlvo) {
+        if (id == null || id.toString().isEmpty() || valorAlvo == null || valorAlvo.compareTo(BigDecimal.ZERO) <= 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(BaseResponseFactory.falha("Requisição inválida. Verifique o ID enviado."));
+        }
+
+        try {
+            boolean gastoDentroDoLimite = disponibilidadeGastoPort.verificarDisponibilidadeGasto(id, valorAlvo);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(BaseResponseFactory.sucesso(gastoDentroDoLimite,
+                            "Verificação de gasto realizada com sucesso"));
+        } catch (Exception ex) {
+            String msg = "Ocorreu um erro ao verificar gasto";
+            entradaLogService.saveLog("ERROR", "UsuarioController", msg, ex.toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(BaseResponseFactory.falha(ex.getMessage()));
+        }
+    }
+
+    @PutMapping("/atualizar-foto")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<Boolean>> atualizarFoto(@RequestBody AlterarFotoRequest request) {
+        if (request.idUsuario() == null || request.idUsuario().toString().isEmpty()
+                || request.fotoPerfilBase64() == null || request.fotoPerfilBase64().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(BaseResponseFactory.falha("Requisição inválida. Verifique os dados enviados."));
+        }
+
+        try {
+            boolean sucesso = alterarFotoPerfilUseCase.alterarFotoPerfil(request.idUsuario(),
+                    request.fotoPerfilBase64());
+            if (sucesso) {
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(BaseResponseFactory.sucesso(true, "Foto atualizada com sucesso"));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(BaseResponseFactory.falha("Usuário não encontrado"));
+            }
+
+        } catch (Exception ex) {
+            String msg = "Ocorreu um erro ao atualizar foto";
+            entradaLogService.saveLog("ERROR", "UsuarioController", msg, ex.toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(BaseResponseFactory.falha(ex.getMessage()));
+        }
     }
 }

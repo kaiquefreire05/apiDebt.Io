@@ -37,13 +37,16 @@ public class Usuario {
     private LocalDateTime dataAtualizacao;
     private List<Contas> contas;
     private Boolean ativo = false;
+    private BigDecimal percentualGastos;
+    private byte[] fotoPerfil;
 
     // Construtores
     public Usuario() {}
 
     public Usuario(UUID id, String nome, String sobrenome, String email, String senha, String cpf, String telefone,
                    LocalDate dataNascimento, BigDecimal rendaMensal,
-                   LocalDateTime dataAtualizacao, List<Contas> contas, Boolean ativo) {
+                   LocalDateTime dataAtualizacao, List<Contas> contas, Boolean ativo, BigDecimal percentualGastos,
+                   byte[] fotoPerfil) {
         this.id = id;
         this.nome = nome;
         this.sobrenome = sobrenome;
@@ -57,12 +60,15 @@ public class Usuario {
         this.dataAtualizacao = dataAtualizacao;
         this.contas = contas;
         this.ativo = ativo;
+        this.percentualGastos = percentualGastos;
+        this.fotoPerfil = fotoPerfil;
     }
 
     // SEM ID
     public Usuario(String nome, String sobrenome, String email, String senha, String cpf, String telefone,
                    LocalDate dataNascimento, BigDecimal rendaMensal,
-                   List<Contas> contas, LocalDateTime dataAtualizacao, Boolean ativo) {
+                   List<Contas> contas, LocalDateTime dataAtualizacao, Boolean ativo, BigDecimal percentualGastos,
+                   byte[] fotoPerfil) {
         this.nome = nome;
         this.sobrenome = sobrenome;
         setEmail(email);
@@ -75,6 +81,8 @@ public class Usuario {
         this.dataAtualizacao = dataAtualizacao;
         this.contas = contas;
         this.ativo = ativo;
+        this.percentualGastos = percentualGastos;
+        this.fotoPerfil = fotoPerfil;
     }
 
     // Construtor para criar um usuário com ID
@@ -200,6 +208,22 @@ public class Usuario {
 
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public BigDecimal getPercentualGastos() {
+        return percentualGastos;
+    }
+
+    public void setPercentualGastos(BigDecimal percentualGastos) {
+        this.percentualGastos = percentualGastos;
+    }
+
+    public byte[] getFotoPerfil() {
+        return fotoPerfil;
+    }
+
+    public void setFotoPerfil(byte[] fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
     }
 
     // Equals e HashCode

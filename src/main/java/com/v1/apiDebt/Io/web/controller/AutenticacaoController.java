@@ -5,6 +5,7 @@ import com.v1.apiDebt.Io.application.ports.input.usuario.BuscarUsuarioPorEmailUs
 import com.v1.apiDebt.Io.application.ports.input.usuario.ConfirmarCadastroUseCase;
 import com.v1.apiDebt.Io.application.ports.input.usuario.CriarUsuarioUseCase;
 import com.v1.apiDebt.Io.application.ports.output.disponibilidade.DisponibilidadeEmailPort;
+import com.v1.apiDebt.Io.domain.models.FotoPerfil;
 import com.v1.apiDebt.Io.domain.models.Usuario;
 import com.v1.apiDebt.Io.infra.adapter.EmailService;
 import com.v1.apiDebt.Io.infra.adapter.EntradaLogService;
@@ -20,7 +21,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.net.URI;
+import java.util.Base64;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -99,6 +102,14 @@ public class AutenticacaoController {
                     .body(BaseResponseFactory.falha("Já existe um usuário cadastrado com esse e-mail"));
         }
 
+        BigDecimal percentualGastos = BigDecimal.valueOf(request.percentualGastos() / 100.0);
+
+        // Verifica se existe uma foto de perfil
+        byte[] fotoBytes = null;
+        if (request.fotoPerfilBase64() != null && !request.fotoPerfilBase64().isEmpty()) {
+            fotoBytes = Base64.getDecoder().decode(request.fotoPerfilBase64());
+        }
+
         // Cria um novo usuário
         Usuario novoUsuario = new Usuario(
             null,
@@ -112,7 +123,9 @@ public class AutenticacaoController {
             request.rendaMensal(),
             null,
             null,
-             false
+            false,
+            percentualGastos,
+            fotoBytes
         );
 
         Usuario usuarioCriado = criarUsuarioUseCase.criar(novoUsuario);

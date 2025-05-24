@@ -16,4 +16,6 @@ public interface UsuarioRepositoryPort {
     Usuario atualizar(Usuario usuario);
     List<Usuario> listarTodosUsuarios();
     boolean confirmarCadastro(String token);
+    boolean alterarFotoPerfil(UUID id, String fotoBase64);
+    boolean adicionarFotoPerfil(UUID id, String fotoBase64);
 }

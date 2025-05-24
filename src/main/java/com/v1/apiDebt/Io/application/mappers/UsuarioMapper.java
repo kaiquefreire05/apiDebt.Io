@@ -1,5 +1,6 @@
 package com.v1.apiDebt.Io.application.mappers;
 
+import com.v1.apiDebt.Io.domain.models.FotoPerfil;
 import com.v1.apiDebt.Io.domain.models.Usuario;
 import com.v1.apiDebt.Io.exceptions.ErroMapperException;
 import com.v1.apiDebt.Io.infra.adapter.EntradaLogService;
@@ -35,6 +36,8 @@ public class UsuarioMapper {
             entity.setRendaMensal(usuario.getRendaMensal());
             entity.setDataCadastro(usuario.getDataCadastro());
             entity.setDataAtualizacao(usuario.getDataAtualizacao());
+            entity.setPercentualGastos(usuario.getPercentualGastos());
+            entity.setFotoPerfil(usuario.getFotoPerfil());
             entity.setContas(null);
             return entity;
 
@@ -65,6 +68,8 @@ public class UsuarioMapper {
               usuario.setDataCadastro(entity.getDataCadastro());
               usuario.setDataAtualizacao(entity.getDataAtualizacao());
               usuario.setAtivo(entity.getAtivo());
+              usuario.setPercentualGastos(entity.getPercentualGastos());
+              usuario.setFotoPerfil(entity.getFotoPerfil());
               return usuario;
 
           } catch (Exception ex) {
