@@ -78,7 +78,8 @@ public class UsuarioController {
                             u.getTelefone(),
                             u.getDataNascimento(),
                             u.getRendaMensal(),
-                            u.getDataCadastro()
+                            u.getDataCadastro(),
+                            u.getPercentualGastos()
                     ))
             .toList();
 
@@ -114,7 +115,8 @@ public class UsuarioController {
                     usuario.getTelefone(),
                     usuario.getDataNascimento(),
                     usuario.getRendaMensal(),
-                    usuario.getDataCadastro()
+                    usuario.getDataCadastro(),
+                    usuario.getPercentualGastos()
             );
             return ResponseEntity.status(HttpStatus.OK)
                     .body(BaseResponseFactory.sucesso(response, "Usuario listado com sucesso"));
@@ -181,12 +183,15 @@ public class UsuarioController {
                     .body(BaseResponseFactory.falha("Usuário não encontrado"));
         }
 
+        BigDecimal percentualGastos = BigDecimal.valueOf(request.percentualGastos() / 100.0);
+
         // Atualiza os dados do usuário
         usuarioExistente.setNome(request.nome());
         usuarioExistente.setSobrenome(request.sobrenome());
         usuarioExistente.setEmail(request.email());
         usuarioExistente.setCpf(request.cpf());
         usuarioExistente.setTelefone(request.telefone());
+        usuarioExistente.setPercentualGastos(percentualGastos);
         usuarioExistente.setDataAtualizacao(LocalDateTime.now());
         Usuario usuarioSalvo = atualizarUsuarioUseCase.atualizar(usuarioExistente);
         UsuarioResponse usuarioResponse = new UsuarioResponse(
@@ -198,7 +203,8 @@ public class UsuarioController {
                 usuarioSalvo.getTelefone(),
                 usuarioSalvo.getDataNascimento(),
                 usuarioSalvo.getRendaMensal(),
-                usuarioSalvo.getDataCadastro()
+                usuarioSalvo.getDataCadastro(),
+                usuarioSalvo.getPercentualGastos()
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(BaseResponseFactory.sucesso(usuarioResponse,

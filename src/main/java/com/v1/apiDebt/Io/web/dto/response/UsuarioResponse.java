@@ -14,6 +14,7 @@ public record UsuarioResponse(
         String telefone,
         LocalDate dataNascimento,
         BigDecimal rendaMensal,
-        LocalDateTime dataCadastro
+        LocalDateTime dataCadastro,
+        BigDecimal percentualGastos
 ) {
 }
