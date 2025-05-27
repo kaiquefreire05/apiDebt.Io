@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public record AtualizarContaRequest(
         @NotNull Long id,
@@ -14,7 +15,7 @@ public record AtualizarContaRequest(
         @NotNull @Positive BigDecimal valor,
         @NotNull TipoPagamentoEnum tipoPagamento,
         @NotNull CategoriasEnum categoria,
-        @NotNull String dataVencimento,
+        @NotNull LocalDate dataVencimento,
         @NotNull Boolean contaRecorrente
 ) {
 }

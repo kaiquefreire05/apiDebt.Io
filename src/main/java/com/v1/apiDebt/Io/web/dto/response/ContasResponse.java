@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record ContasResponse(
+        Long id,
         String nomeCompra,
         BigDecimal valor,
         TipoPagamentoEnum tipoPagamento,

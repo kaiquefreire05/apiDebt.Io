@@ -88,6 +88,7 @@ public class ContasController {
         List<Contas> contaCriada = criarContaUseCase.criar(novaConta);
         List<ContasResponse> responses = contaCriada.stream()
                 .map(conta -> new ContasResponse(
+                        conta.getId(),
                         conta.getNomeCompra(),
                         conta.getValor(),
                         conta.getTipoPagamento(),
@@ -127,13 +128,14 @@ public class ContasController {
         contaExistente.setValor(request.valor());
         contaExistente.setTipoPagamento(request.tipoPagamento());
         contaExistente.setCategoria(request.categoria());
-        contaExistente.setDataVencimento(LocalDate.parse(request.dataVencimento()));
+        contaExistente.setDataVencimento(request.dataVencimento());
         contaExistente.setContaRecorrente(request.contaRecorrente());
         contaExistente.setDataAtualizacao(LocalDateTime.now());
 
         // Persistindo as alterações
         Contas contaAtualizada = atualizarContaUseCase.atualizar(contaExistente);
         ContasResponse response = new ContasResponse(
+                contaAtualizada.getId(),
                 contaAtualizada.getNomeCompra(),
                 contaAtualizada.getValor(),
                 contaAtualizada.getTipoPagamento(),
@@ -187,6 +189,7 @@ public class ContasController {
             List<Contas> contas = listarContasUsuarioUseCase.listarContasUsuario(usuarioId);
             List<ContasResponse> responses = contas.stream()
                     .map(conta -> new ContasResponse(
+                            conta.getId(),
                             conta.getNomeCompra(),
                             conta.getValor(),
                             conta.getTipoPagamento(),
@@ -230,6 +233,7 @@ public class ContasController {
             Contas contaAtualizada = alterarStatusContaUseCase.alterarStatusConta(id, status);
 
             ContasResponse response = new ContasResponse(
+                    contaAtualizada.getId(),
                     contaAtualizada.getNomeCompra(),
                     contaAtualizada.getValor(),
                     contaAtualizada.getTipoPagamento(),
