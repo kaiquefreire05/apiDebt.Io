@@ -1,6 +1,7 @@
 package com.v1.apiDebt.Io.application.services.usuarios;
 
 import com.v1.apiDebt.Io.application.ports.input.usuario.AtualizarUsuarioUseCase;
+import com.v1.apiDebt.Io.application.ports.input.usuario.BuscarUsuarioPorIdUseCase;
 import com.v1.apiDebt.Io.application.ports.output.UsuarioRepositoryPort;
 import com.v1.apiDebt.Io.application.ports.output.disponibilidade.DisponibilidadeCpfPort;
 import com.v1.apiDebt.Io.application.ports.output.disponibilidade.DisponibilidadeEmailPort;
@@ -17,19 +18,29 @@ public class AtualizarUsuarioService implements AtualizarUsuarioUseCase {
     private final UsuarioRepositoryPort usuarioRepository;
     private final DisponibilidadeCpfPort disponibilidadeCpfPort;
     private final DisponibilidadeEmailPort disponibilidadeEmailPort;
+    private final BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase;
 
     public AtualizarUsuarioService(UsuarioRepositoryPort usuarioRepository,
                                    DisponibilidadeCpfPort disponibilidadeCpfPort,
-                                   DisponibilidadeEmailPort disponibilidadeEmailPort) {
+                                   DisponibilidadeEmailPort disponibilidadeEmailPort,
+                                   BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase) {
         this.usuarioRepository = usuarioRepository;
         this.disponibilidadeCpfPort = disponibilidadeCpfPort;
         this.disponibilidadeEmailPort = disponibilidadeEmailPort;
+        this.buscarUsuarioPorIdUseCase = buscarUsuarioPorIdUseCase;
     }
 
     @Override
     public Usuario atualizar(Usuario usuario) {
-        validarDisponibilidadeCpf(usuario.getCpf());
-        validarDisponibilidadeEmail(usuario.getEmail());
+        Usuario usuarioAtual = buscarUsuarioPorIdUseCase.buscarPorId(usuario.getId());
+        if (!usuario.getCpf().equals(usuarioAtual.getCpf())) {
+            validarDisponibilidadeCpf(usuario.getCpf());
+        }
+
+        if (!usuario.getCpf().equals(usuarioAtual.getCpf())) {
+            validarDisponibilidadeEmail(usuario.getEmail());
+        }
+
         return usuarioRepository.atualizar(usuario);
     }
 

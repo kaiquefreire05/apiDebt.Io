@@ -38,27 +38,29 @@ public class UsuarioConfig {
 
     @Bean
     public DisponibilidadeCpfPort disponibilidadeCpfPort(UsuarioJpaRepository repository,
-                                          ContasJpaRepository contasRepository) {
+                                                         ContasJpaRepository contasRepository) {
         return new DisponibilidadesUsuarioAdapter(repository, contasRepository);
     }
 
     @Bean
     public DisponibilidadeEmailPort disponibilidadeEmailPort(UsuarioJpaRepository repository,
-                                          ContasJpaRepository contasRepository) {
+                                                             ContasJpaRepository contasRepository) {
         return new DisponibilidadesUsuarioAdapter(repository, contasRepository);
     }
 
     @Bean
     public DisponibilidadeGastoPort disponibilidadeGastoPort(UsuarioJpaRepository repository,
-                                          ContasJpaRepository contasRepository) {
+                                                             ContasJpaRepository contasRepository) {
         return new DisponibilidadesUsuarioAdapter(repository, contasRepository);
     }
 
     @Bean
     public AtualizarUsuarioUseCase atualizarUsuarioUseCase(UsuarioRepositoryPort usuarioRepository,
-                                   DisponibilidadeCpfPort disponibilidadeCpfPort,
-                                   DisponibilidadeEmailPort disponibilidadeEmailPort) {
-        return new AtualizarUsuarioService(usuarioRepository, disponibilidadeCpfPort, disponibilidadeEmailPort);
+                                                           DisponibilidadeCpfPort disponibilidadeCpfPort,
+                                                           DisponibilidadeEmailPort disponibilidadeEmailPort,
+                                                           BuscarUsuarioPorIdUseCase buscarUsuarioPorIdUseCase) {
+        return new AtualizarUsuarioService(usuarioRepository, disponibilidadeCpfPort, disponibilidadeEmailPort,
+                buscarUsuarioPorIdUseCase);
     }
 
     @Bean
